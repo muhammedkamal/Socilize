@@ -62,7 +62,7 @@ class ActivityFeedItem extends StatelessWidget {
     );
   }
   showPost(context){
-    Navigator.push(context, MaterialPageRoute(builder: (context)=>PostScreen(userId: userId,postId: postId,),),);
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>PostScreen(userId: currentUser.id,postId: postId,),),);
   }
   configureMediaPreview(BuildContext context)
   {
@@ -88,7 +88,7 @@ class ActivityFeedItem extends StatelessWidget {
         );
       }
     else{
-      print("follow");
+      mediaPreview=Text("");
     }
     if(type=='like')
       activityItemText = "liked your post";

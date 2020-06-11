@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:socialize/models/user.dart';
 import 'package:image/image.dart' as Im;
 import 'package:socialize/pages/home.dart';
+import 'package:socialize/widgets/progress.dart';
 import 'package:uuid/uuid.dart';
 
 class Upload extends StatefulWidget {
@@ -145,6 +146,7 @@ class _UploadState extends State<Upload> {
       isUploading =false;
       file=null;
     });
+    Navigator.push(context, MaterialPageRoute(builder: (context)=>Home()));
   }
   Scaffold buildUploadForm(){
     return Scaffold(
@@ -168,6 +170,7 @@ class _UploadState extends State<Upload> {
       ),
       body: ListView(
         children: <Widget>[
+          isUploading?linearProgress():Text(""),
           Container(
             height: 220,
             width: MediaQuery.of(context).size.width*.8,
@@ -233,7 +236,7 @@ class _UploadState extends State<Upload> {
     );
   }
   getUserLocation() async{
-    Position position = await Geolocator().getCurrentPosition(desiredAccuracy : LocationAccuracy.low);
+    Position position = await Geolocator().getCurrentPosition(desiredAccuracy : LocationAccuracy.medium);
     List<Placemark> placeMarks = await Geolocator().placemarkFromCoordinates(position.latitude, position.longitude);
 
     Placemark placeMark = placeMarks[0];

@@ -23,7 +23,10 @@ class _ProfileState extends State<Profile> {
   String postOrientation='grid';
   List<Post> posts =[];
   int postCount=0;
+  int followersCount=0;
+  int followingCount=0;
   bool isLoading=false;
+  bool isFollowing= false;
   Column buildCountColumn(String label, int count)
   {
     return Column(
@@ -50,13 +53,14 @@ class _ProfileState extends State<Profile> {
         onPressed: onPressed,
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).accentColor,
-            border: Border.all(color:Theme.of(context).accentColor,),
+            color: isFollowing?Colors.white:Theme.of(context).accentColor,
+            border: Border.all(color:isFollowing?Colors.white:Theme.of(context).accentColor,),
             borderRadius: BorderRadius.circular(5.0),
           ),
           alignment: Alignment.center,
           child: Text(text,
-            style: TextStyle(fontWeight: FontWeight.bold),
+            style: TextStyle(fontWeight: FontWeight.bold,
+            color: isFollowing?Colors.black:Colors.white),
           ),
           width: 250.0,
           height: 27.0,
@@ -70,7 +74,62 @@ class _ProfileState extends State<Profile> {
       return buildButton(text:'Edit Profile',onPressed: (){
         Navigator.push(context, MaterialPageRoute(builder: (context)=>EditProfile(currentUserID: currentUserId,)));
       });
-    return Text('Edit Profile');
+    else if (isFollowing)
+      {
+        return buildButton(text: "UnFollow",onPressed: handleUnFollow);
+      }
+    else if (!isFollowing)
+    {
+      return buildButton(text: "Follow",onPressed: handleFollow);
+    }
+  }
+  handleUnFollow()
+  {
+    setState(() {
+      isFollowing=false;
+      followersCount--;
+    });
+    // remove current user to this user profile followers
+    followersRef.document(widget.profileId).collection('userFollowers').document(currentUserId)
+        .get().then((doc){
+          if (doc.exists)
+            doc.reference.delete();
+    });
+    // remove this user to current user following
+    followingRef.document(currentUserId).collection('userFollowers').document(widget.profileId)
+        .get().then((doc){
+      if (doc.exists)
+        doc.reference.delete();
+    });
+    // remove activity feed to this user
+    activityFeedRef.document(widget.profileId).collection('feedItems').document(currentUserId)
+        .get().then((doc){
+      if (doc.exists)
+        doc.reference.delete();
+    });
+  }
+  handleFollow()
+  {
+    setState(() {
+      isFollowing=true;
+      followersCount++;
+    });
+    // adding current user to this user profile followers
+    followersRef.document(widget.profileId).collection('userFollowers').document(currentUserId)
+    .setData({});
+    // adding this user to current user following
+    followingRef.document(currentUserId).collection('userFollowers').document(widget.profileId)
+        .setData({});
+    // add activity feed to this user
+    activityFeedRef.document(widget.profileId).collection('feedItems').document(currentUserId)
+    .setData({
+      'type': 'follow',
+      'ownerId':widget.profileId,
+      'username': currentUser.username,
+      'userId': currentUser.id,
+      'userProfileImg': currentUser.photoUrl,
+      'timestamp': timeStamp,
+    });
   }
   buildProfileHeader(){
     return FutureBuilder(
@@ -99,8 +158,8 @@ class _ProfileState extends State<Profile> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             buildCountColumn('Posts',postCount),
-                            buildCountColumn('Followers',0),
-                            buildCountColumn('Following',0),
+                            buildCountColumn('Followers',followersCount),
+                            buildCountColumn('Following',followingCount),
                           ],
                         ),
                         Row(
@@ -226,7 +285,29 @@ class _ProfileState extends State<Profile> {
   @override
   void initState() {
     getUserPosts();
+    getFollowers();
+    getFollowing();
+    checkFollowing();
     super.initState();
+  }
+  getFollowers()async {
+    QuerySnapshot snapshot = await followersRef.document(widget.profileId).collection('userFollowers').getDocuments();
+    setState(() {
+      followersCount = snapshot.documents.length;
+    });
+  }
+  getFollowing() async{
+    QuerySnapshot snapshot = await followingRef.document(widget.profileId).collection('userFollowers').getDocuments();
+    setState(() {
+      followingCount = snapshot.documents.length;
+    });
+  }
+  checkFollowing()async{
+    DocumentSnapshot doc=await followersRef.document(widget.profileId).collection('userFollowers').document(currentUserId)
+      .get();
+    setState(() {
+      isFollowing = doc.exists;
+    });
   }
   @override
   Widget build(BuildContext context) {
