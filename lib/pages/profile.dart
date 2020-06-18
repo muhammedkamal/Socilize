@@ -116,7 +116,7 @@ class _ProfileState extends State<Profile> {
     });
     // adding current user to this user profile followers
     followersRef.document(widget.profileId).collection('userFollowers').document(currentUserId)
-    .setData({});
+   .setData({});
     // adding this user to current user following
     followingRef.document(currentUserId).collection('userFollowers').document(widget.profileId)
         .setData({});
@@ -158,7 +158,7 @@ class _ProfileState extends State<Profile> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             buildCountColumn('Posts',postCount),
-                            buildCountColumn('Followers',followersCount),
+                            buildCountColumn('Followers',followersCount-1),
                             buildCountColumn('Following',followingCount),
                           ],
                         ),

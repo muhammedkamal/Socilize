@@ -54,9 +54,9 @@ class _HomeState extends State<Home> {
     googleSignIn.signOut();
   }
 
-  handleSignIn(GoogleSignInAccount account) {
+  handleSignIn(GoogleSignInAccount account) async{
     if (account != null) {
-      createUserInFireStore();
+      await createUserInFireStore();
       setState(() {
         isAuth = true;
       });
@@ -88,6 +88,8 @@ class _HomeState extends State<Home> {
         "bio": "",
         "timeStamp": timeStamp,
       });
+      //add user to his own followers
+      followersRef.document(user.id).collection('userFollowers').document(user.id).setData({});
       doc = await usersRef.document(user.id).get();
     }
     currentUser =User.fromDocument(doc);
@@ -185,6 +187,8 @@ class _HomeState extends State<Home> {
       print(err);
     });
     pageController = PageController(); //can change initital page
+    //followersRef.document(currentUser.id).collection('userFollowers').document(currentUser.id).setData({});
+
     super.initState();
   }
 

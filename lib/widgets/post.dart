@@ -89,10 +89,10 @@ class _PostState extends State<Post> {
           ),
           onTap: () => showProfile(context, profileId: ownerId),
           subtitle: Text(location),
-          trailing: IconButton(
+          trailing: ownerId==currentUserId?IconButton(
             onPressed: () => handleDeletePost(context),
             icon: Icon(Icons.more_vert),
-          ),
+          ):Text(""),
         );
       },
     );
