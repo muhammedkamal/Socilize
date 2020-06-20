@@ -80,7 +80,7 @@ class _EditProfileState extends State<EditProfile> {
     if (_displayNameValid&&_bioValid)
       {
         usersRef.document(widget.currentUserID).updateData({
-          'diplayName': displayNameController.text,
+          'displayName': displayNameController.text,
           'bio':bioController.text
         });
       }
